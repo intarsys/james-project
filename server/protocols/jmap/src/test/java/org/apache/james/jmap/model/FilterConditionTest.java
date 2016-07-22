@@ -28,6 +28,8 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+
 public class FilterConditionTest {
 
     @Test
@@ -41,7 +43,15 @@ public class FilterConditionTest {
         FilterCondition filterCondition = FilterCondition.builder()
                 .inMailboxes(Optional.of(ImmutableList.of("1", "2")))
                 .build();
-        assertThat(filterCondition.getInMailboxes()).isEqualTo(Optional.of(ImmutableList.of("1", "2")));
+        assertThat(filterCondition.getInMailboxes()).contains(ImmutableList.of("1", "2"));
+    }
+
+    @Test
+    public void buildShouldWorkWhenGivenInMailboxesAsEllipsis() {
+        FilterCondition filterCondition = FilterCondition.builder()
+                .inMailboxes("1", "2")
+                .build();
+        assertThat(filterCondition.getInMailboxes()).contains(ImmutableList.of("1", "2"));
     }
 
     @Test
@@ -49,9 +59,17 @@ public class FilterConditionTest {
         FilterCondition filterCondition = FilterCondition.builder()
                 .notInMailboxes(Optional.of(ImmutableList.of("1", "2")))
                 .build();
-        assertThat(filterCondition.getNotInMailboxes()).isEqualTo(Optional.of(ImmutableList.of("1", "2")));
+        assertThat(filterCondition.getNotInMailboxes()).contains(ImmutableList.of("1", "2"));
     }
 
+    @Test
+    public void builderShouldBuildWhenGivenNotInMailboxesAsEllipsis() {
+        FilterCondition filterCondition = FilterCondition.builder()
+                .notInMailboxes("1", "2")
+                .build();
+        assertThat(filterCondition.getNotInMailboxes()).contains(ImmutableList.of("1", "2"));
+    }
+    
     @Test(expected=NotImplementedException.class)
     public void builderShouldThrowWhenBefore() {
         FilterCondition.builder().before(null);
@@ -141,13 +159,18 @@ public class FilterConditionTest {
     public void buildShouldWork() {
         FilterCondition expectedFilterCondition = new FilterCondition(Optional.of(ImmutableList.of("1")), Optional.of(ImmutableList.of("2")), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 
                 Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 
-                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), ImmutableList.of());
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
 
         FilterCondition filterCondition = FilterCondition.builder()
                 .inMailboxes(Optional.of(ImmutableList.of("1")))
-                .notInMailboxes(Optional.of(ImmutableList.of("2")))
+                .notInMailboxes("2")
                 .build();
 
         assertThat(filterCondition).isEqualToComparingFieldByField(expectedFilterCondition);
+    }
+
+    @Test
+    public void shouldRespectJavaBeanContract() {
+        EqualsVerifier.forClass(FilterCondition.class).verify();
     }
 }

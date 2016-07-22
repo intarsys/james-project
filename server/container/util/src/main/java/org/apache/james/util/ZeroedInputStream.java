@@ -16,14 +16,27 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
+package org.apache.james.util;
 
-package org.apache.james.jmap.model;
+import java.io.InputStream;
 
-import org.apache.james.jmap.json.FilterDeserializer;
+public class ZeroedInputStream extends InputStream {
+    public static final int RETURNED_VALUE = 0;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+    private final int max;
+    private int pos;
 
-@JsonDeserialize(using = FilterDeserializer.class)
-public interface Filter {
-    String prettyPrint(String indentation);
+    public ZeroedInputStream(int max) {
+        this.max = max;
+        this.pos = 0;
+    }
+
+    @Override
+    public int read() {
+        if (pos < max) {
+            pos++;
+            return RETURNED_VALUE;
+        }
+        return -1;
+    }
 }

@@ -16,14 +16,39 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
+package org.apache.james.core;
 
-package org.apache.james.jmap.model;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.james.jmap.json.FilterDeserializer;
+import java.io.IOException;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import javax.mail.MessagingException;
 
-@JsonDeserialize(using = FilterDeserializer.class)
-public interface Filter {
-    String prettyPrint(String indentation);
+import org.apache.james.util.ZeroedInputStream;
+import org.junit.After;
+import org.junit.Test;
+
+public class MimeMessageInputStreamSourceTest {
+
+    private static final int _1M = 1024*1024;
+    private static final int _10KB = 10*1024;
+    private MimeMessageInputStreamSource testee;
+
+    @After
+    public void tearDown() {
+        testee.dispose();
+    }
+    
+    @Test
+    public void streamWith1MBytesShouldBeReadable() throws MessagingException, IOException {
+        testee = new MimeMessageInputStreamSource("myKey", new ZeroedInputStream(_1M));
+        assertThat(testee.getInputStream()).hasContentEqualTo(new ZeroedInputStream(_1M));
+    }
+    
+    @Test
+    public void streamWith10KBytesShouldBeReadable() throws MessagingException, IOException {
+        testee = new MimeMessageInputStreamSource("myKey", new ZeroedInputStream(_10KB));
+        assertThat(testee.getInputStream()).hasContentEqualTo(new ZeroedInputStream(_10KB));
+    }
+    
 }
